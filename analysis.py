@@ -1743,11 +1743,10 @@ def colorplot_special(inputFile,
     x = x.reshape((-1, len_x))
     y = y.reshape((-1, len_x))
     z = z.reshape((-1, len_x))
-    # data as array x, y
+
     flatx = x[0, :]
     flaty = y[:, 0]
-    # print(flatx)
-    # print(flaty)
+
 
     # fig2D = plt.figure(figsize = (8,14))
     fig2D = plt.figure(figsize=(8, 8))
@@ -1760,6 +1759,7 @@ def colorplot_special(inputFile,
     cbar = plt.colorbar(im, orientation='vertical')
     plt.xlabel(label_x, fontsize=axes_font)
     plt.ylabel(label_y, fontsize=axes_font)
+    plt.title(inputFile)
     cbar.set_label(label_z, size=axes_font)
 
 
