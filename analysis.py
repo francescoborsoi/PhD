@@ -1722,7 +1722,6 @@ def colorplot_special(inputFile,
               color_min = 0,
               color_max = 1):
 
-
     # inputFile is the only mandatory argument i.e. 'folder/../example.dat'
     # others are options
     # col_x: integer, refers to column to use as y
@@ -1731,74 +1730,88 @@ def colorplot_special(inputFile,
     # point list i.e. [(0,0), (1,0)] in the raw data - with no conversions
     # horizontal linecuts is a list of y_cuts
 
-
     # loading data file
     data = np.loadtxt(inputFile, skiprows=1)
     x = conversion_x * np.array(data[:, col_x])  # fast scan direction (usually second column)
     y = conversion_y * np.array(data[:, col_y])  # slow scan direction (usually first column)
     z = conversion_z * np.array(data[:, col_z])  # to plot
-
     idx = np.nonzero(x == x[0])[0]
     len_x = idx[1]
     x = x.reshape((-1, len_x))
     y = y.reshape((-1, len_x))
     z = z.reshape((-1, len_x))
-
     flatx = x[0, :]
     flaty = y[:, 0]
 
 
     # fig2D = plt.figure(figsize = (8,14))
-    fig2D = plt.figure(figsize=(8, 8))
+    #fig = plt.figure(figsize=(6, 12))
+
+    fig, (ax1, ax2, ax3) = plt.subplots(figsize=(6, 12), nrows=3, ncols=1, squeeze=True)
+
+    #ax1 = plt.subplot2grid((3, 1), (0, 0))
+    #ax2 = plt.subplot2grid((3, 1), (1, 0))
+    #ax3 = plt.subplot2grid((3, 1), (2, 0))
+
     if x_lims is not False:
-        plt.xlim(x_lims[0], x_lims[1])
+        ax1.set_xlim(x_lims[0], x_lims[1])
     if y_lims is not False:
-        plt.ylim(y_lims[0], y_lims[1])
-    im = plt.imshow(z, cmap=plt.cm.RdBu, norm=LogNorm(vmin=z.min(), vmax=z.max()),  interpolation='none', origin='lower',
+        ax1.set_ylim(y_lims[0], y_lims[1])
+    im = ax1.imshow(z, cmap=plt.cm.RdBu, norm=LogNorm(vmin=z.min(), vmax=z.max()),  interpolation='none', origin='lower',
                     extent=[flatx[0], flatx[-1], flaty[0], flaty[-1]], aspect="auto", vmin = color_min, vmax = color_max)
-    cbar = plt.colorbar(im, orientation='vertical')
-    plt.xlabel(label_x, fontsize=axes_font)
-    plt.ylabel(label_y, fontsize=axes_font)
-    plt.title(inputFile)
+    cbar = fig.colorbar(im, ax=ax1, orientation='horizontal', use_gridspec=False)
+
+    cbar.ax.tick_params(labelsize=axes_font, which='both', direction='in', width=1)
+    cbar.set_label(label_z, size=axes_font, labelpad=-2)
+    cbar.ax.spines['right'].set_linewidth(1)
+    cbar.ax.spines['left'].set_linewidth(1)
+    cbar.ax.spines['top'].set_linewidth(1)
+    cbar.ax.spines['bottom'].set_linewidth(1)
     cbar.set_label(label_z, size=axes_font)
 
 
+    ax1.set_xlabel(label_x, fontsize=axes_font)
+    ax1.set_ylabel(label_y, fontsize=axes_font)
+    ax1.set_title(inputFile)
+
     if points_list is not None:
         for point in points_list:
-            plt.plot(conversion_x * point[0], conversion_y * point[1], 'o', color='yellow')
+            ax1.plot(conversion_x * point[0], conversion_y * point[1], 'o', color='yellow')
             print('First point at:', point[0], ',', point[1])
-    fig2D.savefig(str(plot_name) + '.png', bbox_inches='tight')
 
     # horizontal linecuts
     if horizontal_linecuts is not None:
-
-        hcut = plt.figure()
-        plt.xlabel(label_x, fontsize=axes_font)
-        plt.ylabel(label_z, size=axes_font)
+        ax2.set_xlabel(label_x, fontsize=axes_font)
+        ax2.set_ylabel(label_z, size=axes_font)
         for y_cut in horizontal_linecuts:
             y_cut_real = find_nearest(flaty, y_cut)
             data_hcut = data[data[:, col_y] == y_cut_real]
             z_cut = conversion_z * np.array(data_hcut[:, col_z])
             x_cut = conversion_x * np.array(data_hcut[:, col_x])
-            plt.plot(x_cut, z_cut, label=str(y_cut_real))
+            ax2.plot(x_cut, z_cut, label=str(y_cut_real))
         if x_lims is not False:
-            plt.xlim(x_lims[0], x_lims[1])
-        plt.legend(loc=0)
+            ax2.set_xlim(x_lims[0], x_lims[1])
+
+
+        ax2.legend(loc=0)
 
     # vertical linecuts
     if vertical_linecuts is not None:
-        vcut = plt.figure()
-        plt.xlabel(label_y, fontsize=axes_font)
-        plt.ylabel(label_z, size=axes_font)
+        ax3.set_xlabel(label_y, fontsize=axes_font)
+        ax3.set_ylabel(label_z, size=axes_font)
         for x_cut in vertical_linecuts:
             x_cut_real = find_nearest(flatx, x_cut)
             data_vcut = data[data[:, col_x] == x_cut_real]
             z_cut = conversion_z * np.array(data_vcut[:, col_z])
             y_cut = conversion_x * np.array(data_vcut[:, col_y])
-            plt.plot(y_cut, z_cut, label=str(x_cut_real))
+            ax3.plot(y_cut, z_cut, label=str(x_cut_real))
         if y_lims is not False:
-            plt.xlim(y_lims[0], y_lims[1])
-        plt.legend(loc=0)
+            ax3.set_xlim(y_lims[0], y_lims[1])
+
+        ax3.legend(loc=0)
+
+        fig.tight_layout()
+        fig.savefig(str(plot_name) + '.png', bbox_inches='tight')
 
     return flatx, flaty, z
 
