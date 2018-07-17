@@ -1759,7 +1759,7 @@ def colorplot_special(inputFile,
         ax1.set_ylim(y_lims[0], y_lims[1])
     im = ax1.imshow(z, cmap=plt.cm.RdBu, norm=LogNorm(vmin=z.min(), vmax=z.max()),  interpolation='none', origin='lower',
                     extent=[flatx[0], flatx[-1], flaty[0], flaty[-1]], aspect="auto", vmin = color_min, vmax = color_max)
-    cbar = fig.colorbar(im, ax=ax1, orientation='horizontal', use_gridspec=False)
+    cbar = fig.colorbar(im, ax=ax1, orientation='vertical', aspect = 10, shrink = 0.8 )
 
     cbar.ax.tick_params(labelsize=axes_font, which='both', direction='in', width=1)
     cbar.set_label(label_z, size=axes_font, labelpad=-2)
@@ -1783,6 +1783,8 @@ def colorplot_special(inputFile,
     if horizontal_linecuts is not None:
         ax2.set_xlabel(label_x, fontsize=axes_font)
         ax2.set_ylabel(label_z, size=axes_font)
+        cbar2 = plt.colorbar(im, ax=ax2, orientation='vertical')
+        cbar2.remove()
         for y_cut in horizontal_linecuts:
             y_cut_real = find_nearest(flaty, y_cut)
             data_hcut = data[data[:, col_y] == y_cut_real]
@@ -1799,6 +1801,8 @@ def colorplot_special(inputFile,
     if vertical_linecuts is not None:
         ax3.set_xlabel(label_y, fontsize=axes_font)
         ax3.set_ylabel(label_z, size=axes_font)
+        cbar3 = plt.colorbar(im, ax=ax3, orientation='vertical')
+        cbar3.remove()
         for x_cut in vertical_linecuts:
             x_cut_real = find_nearest(flatx, x_cut)
             data_vcut = data[data[:, col_x] == x_cut_real]
@@ -1810,7 +1814,7 @@ def colorplot_special(inputFile,
 
         ax3.legend(loc=0)
 
-        fig.tight_layout()
+        #fig.tight_layout()
         fig.savefig(str(plot_name) + '.png', bbox_inches='tight')
 
     return flatx, flaty, z
