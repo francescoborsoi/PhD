@@ -1777,7 +1777,7 @@ def colorplot_special(inputFile,
         plt.ylabel(label_z, size=axes_font)
         for y_cut in horizontal_linecuts:
             y_cut_real = find_nearest(flaty, y_cut)
-            data_hcut = data[data[:, 0] == y_cut_real]
+            data_hcut = data[data[:, col_y] == y_cut_real]
             z_cut = conversion_z * np.array(data_hcut[:, col_z])
             x_cut = conversion_x * np.array(data_hcut[:, col_x])
             plt.plot(x_cut, z_cut, label=str(y_cut_real))
@@ -1792,7 +1792,7 @@ def colorplot_special(inputFile,
         plt.ylabel(label_z, size=axes_font)
         for x_cut in vertical_linecuts:
             x_cut_real = find_nearest(flatx, x_cut)
-            data_vcut = data[data[:, 1] == x_cut_real]
+            data_vcut = data[data[:, col_x] == x_cut_real]
             z_cut = conversion_z * np.array(data_vcut[:, col_z])
             y_cut = conversion_x * np.array(data_vcut[:, col_y])
             plt.plot(y_cut, z_cut, label=str(x_cut_real))
