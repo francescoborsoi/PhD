@@ -1747,7 +1747,7 @@ def colorplot_special(inputFile,
     # fig2D = plt.figure(figsize = (8,14))
     #fig = plt.figure(figsize=(6, 12))
 
-    fig, (ax1, ax2, ax3) = plt.subplots(figsize=(6, 12), nrows=3, ncols=1, squeeze=True)
+    fig, (ax1, ax2, ax3) = plt.subplots(figsize=(6, 14), nrows=3, ncols=1, squeeze=True)
 
     #ax1 = plt.subplot2grid((3, 1), (0, 0))
     #ax2 = plt.subplot2grid((3, 1), (1, 0))
