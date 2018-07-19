@@ -24,6 +24,7 @@ from IPython.display import Math
 from scipy import optimize
 from scipy.signal import find_peaks_cwt
 from matplotlib.colors import LogNorm
+import time
 
 title_font=14
 axes_font=14
@@ -1730,18 +1731,38 @@ def colorplot_special(inputFile,
     # point list i.e. [(0,0), (1,0)] in the raw data - with no conversions
     # horizontal linecuts is a list of y_cuts
 
-    # loading data file
+    # loading data file for the first time
     data = np.loadtxt(inputFile, skiprows=1)
     x = conversion_x * np.array(data[:, col_x])  # fast scan direction (usually second column)
     y = conversion_y * np.array(data[:, col_y])  # slow scan direction (usually first column)
     z = conversion_z * np.array(data[:, col_z])  # to plot
     idx = np.nonzero(x == x[0])[0]
     len_x = idx[1]
+
+    #print(len(x))
+
+
+
+    while (len(x) % len_x !=0):
+        time.sleep(0.3)
+        data = np.loadtxt(inputFile, skiprows=1)
+        x = conversion_x * np.array(data[:, col_x])  # fast scan direction (usually second column)
+        y = conversion_y * np.array(data[:, col_y])  # slow scan direction (usually first column)
+        z = conversion_z * np.array(data[:, col_z])  # to plot
+        idx = np.nonzero(x == x[0])[0]
+        len_x = idx[1]
+
+
+
+
+
     x = x.reshape((-1, len_x))
     y = y.reshape((-1, len_x))
     z = z.reshape((-1, len_x))
     flatx = x[0, :]
     flaty = y[:, 0]
+
+
 
 
     # fig2D = plt.figure(figsize = (8,14))
