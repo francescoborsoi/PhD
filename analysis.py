@@ -18,7 +18,6 @@ import scipy.special as sp
 from mpl_toolkits.mplot3d import axes3d
 from mpl_toolkits.axes_grid.inset_locator import inset_axes
 import matplotlib.collections as collections
-import scipy.optimize as op
 import importlib
 from IPython.display import Math
 from scipy import optimize
@@ -1676,7 +1675,7 @@ def colorplot(inputFile,
     if points_list is not None:
         for point in points_list:
             plt.plot(conversion_x * point[0], conversion_y * point[1], 'o', color='yellow')
-            print('First point at:', point[0], ',', point[1])
+            print('Point at:', point[0], ',', point[1])
     fig2D.savefig(str(plot_name) + '.png', bbox_inches='tight')
 
     # horizontal linecuts
@@ -1739,10 +1738,7 @@ def colorplot_special(inputFile,
     idx = np.nonzero(x == x[0])[0]
     len_x = idx[1]
 
-    #print(len(x))
-
-
-
+    #looping until x, y, and z cam be reshaped correctly.
     while (len(x) % len_x !=0):
         time.sleep(0.3)
         data = np.loadtxt(inputFile, skiprows=1)
@@ -1753,90 +1749,202 @@ def colorplot_special(inputFile,
         len_x = idx[1]
 
 
-
-
-
     x = x.reshape((-1, len_x))
     y = y.reshape((-1, len_x))
     z = z.reshape((-1, len_x))
     flatx = x[0, :]
     flaty = y[:, 0]
 
+    if horizontal_linecuts is not None and vertical_linecuts is not None:
+        fig, (ax1, ax2, ax3) = plt.subplots(figsize=(6, 14), nrows=3, ncols=1, squeeze=True)
 
-
-
-    # fig2D = plt.figure(figsize = (8,14))
-    #fig = plt.figure(figsize=(6, 12))
-
-    fig, (ax1, ax2, ax3) = plt.subplots(figsize=(6, 14), nrows=3, ncols=1, squeeze=True)
-
-    #ax1 = plt.subplot2grid((3, 1), (0, 0))
-    #ax2 = plt.subplot2grid((3, 1), (1, 0))
-    #ax3 = plt.subplot2grid((3, 1), (2, 0))
-
-    if x_lims is not False:
-        ax1.set_xlim(x_lims[0], x_lims[1])
-    if y_lims is not False:
-        ax1.set_ylim(y_lims[0], y_lims[1])
-    im = ax1.imshow(z, cmap=plt.cm.RdBu, norm=LogNorm(vmin=z.min(), vmax=z.max()),  interpolation='none', origin='lower',
-                    extent=[flatx[0], flatx[-1], flaty[0], flaty[-1]], aspect="auto", vmin = color_min, vmax = color_max)
-    cbar = fig.colorbar(im, ax=ax1, orientation='vertical', aspect = 10, shrink = 0.8 )
-
-    cbar.ax.tick_params(labelsize=axes_font, which='both', direction='in', width=1)
-    cbar.set_label(label_z, size=axes_font, labelpad=-2)
-    cbar.ax.spines['right'].set_linewidth(1)
-    cbar.ax.spines['left'].set_linewidth(1)
-    cbar.ax.spines['top'].set_linewidth(1)
-    cbar.ax.spines['bottom'].set_linewidth(1)
-    cbar.set_label(label_z, size=axes_font)
-
-
-    ax1.set_xlabel(label_x, fontsize=axes_font)
-    ax1.set_ylabel(label_y, fontsize=axes_font)
-    ax1.set_title(inputFile)
-
-    if points_list is not None:
-        for point in points_list:
-            ax1.plot(conversion_x * point[0], conversion_y * point[1], 'o', color='yellow')
-            print('First point at:', point[0], ',', point[1])
-
-    # horizontal linecuts
-    if horizontal_linecuts is not None:
-        ax2.set_xlabel(label_x, fontsize=axes_font)
-        ax2.set_ylabel(label_z, size=axes_font)
-        cbar2 = plt.colorbar(im, ax=ax2, orientation='vertical')
-        cbar2.remove()
-        for y_cut in horizontal_linecuts:
-            y_cut_real = find_nearest(flaty, y_cut)
-            data_hcut = data[data[:, col_y] == y_cut_real]
-            z_cut = conversion_z * np.array(data_hcut[:, col_z])
-            x_cut = conversion_x * np.array(data_hcut[:, col_x])
-            ax2.plot(x_cut, z_cut, label=str(y_cut_real))
         if x_lims is not False:
-            ax2.set_xlim(x_lims[0], x_lims[1])
-
-
-        ax2.legend(loc=0)
-
-    # vertical linecuts
-    if vertical_linecuts is not None:
-        ax3.set_xlabel(label_y, fontsize=axes_font)
-        ax3.set_ylabel(label_z, size=axes_font)
-        cbar3 = plt.colorbar(im, ax=ax3, orientation='vertical')
-        cbar3.remove()
-        for x_cut in vertical_linecuts:
-            x_cut_real = find_nearest(flatx, x_cut)
-            data_vcut = data[data[:, col_x] == x_cut_real]
-            z_cut = conversion_z * np.array(data_vcut[:, col_z])
-            y_cut = conversion_x * np.array(data_vcut[:, col_y])
-            ax3.plot(y_cut, z_cut, label=str(x_cut_real))
+            ax1.set_xlim(x_lims[0], x_lims[1])
         if y_lims is not False:
-            ax3.set_xlim(y_lims[0], y_lims[1])
+            ax1.set_ylim(y_lims[0], y_lims[1])
+        im = ax1.imshow(z, cmap=plt.cm.RdBu, norm=LogNorm(vmin=z.min(), vmax=z.max()),  interpolation='none', origin='lower',
+                        extent=[flatx[0], flatx[-1], flaty[0], flaty[-1]], aspect="auto", vmin = color_min, vmax = color_max)
+        cbar = fig.colorbar(im, ax=ax1, orientation='vertical', aspect = 10, shrink = 0.8 )
 
-        ax3.legend(loc=0)
-
+        cbar.ax.tick_params(labelsize=axes_font, which='both', direction='in', width=1)
+        cbar.set_label(label_z, size=axes_font, labelpad=-2)
+        cbar.ax.spines['right'].set_linewidth(1)
+        cbar.ax.spines['left'].set_linewidth(1)
+        cbar.ax.spines['top'].set_linewidth(1)
+        cbar.ax.spines['bottom'].set_linewidth(1)
+        cbar.set_label(label_z, size=axes_font)
+        ax1.set_xlabel(label_x, fontsize=axes_font)
+        ax1.set_ylabel(label_y, fontsize=axes_font)
+        ax1.set_title(inputFile)
+        if points_list is not None:
+            for point in points_list:
+                ax1.plot(conversion_x * point[0], conversion_y * point[1], '*', color='yellow', markersize  = 10)
+                print('First point at:', point[0], ',', point[1])
+        # horizontal linecuts
+        if horizontal_linecuts is not None:
+            ax2.set_xlabel(label_x, fontsize=axes_font)
+            ax2.set_ylabel(label_z, size=axes_font)
+            cbar2 = plt.colorbar(im, ax=ax2, orientation='vertical')
+            cbar2.remove()
+            for y_cut in horizontal_linecuts:
+                y_cut_real = find_nearest(flaty, y_cut)
+                data_hcut = data[data[:, col_y] == y_cut_real]
+                z_cut = conversion_z * np.array(data_hcut[:, col_z])
+                x_cut = conversion_x * np.array(data_hcut[:, col_x])
+                ax2.plot(x_cut, z_cut, label=str(np.round(y_cut_real,2)))
+            if x_lims is not False:
+                ax2.set_xlim(x_lims[0], x_lims[1])
+            ax2.legend(loc=0)
+        else:
+            ax2.remove()
+        # vertical linecuts
+        if vertical_linecuts is not None:
+            ax3.set_xlabel(label_y, fontsize=axes_font)
+            ax3.set_ylabel(label_z, size=axes_font)
+            cbar3 = plt.colorbar(im, ax=ax3, orientation='vertical')
+            cbar3.remove()
+            for x_cut in vertical_linecuts:
+                x_cut_real = find_nearest(flatx, x_cut)
+                data_vcut = data[data[:, col_x] == x_cut_real]
+                z_cut = conversion_z * np.array(data_vcut[:, col_z])
+                y_cut = conversion_x * np.array(data_vcut[:, col_y])
+                ax3.plot(y_cut, z_cut, label=str(np.round(x_cut_real)))
+            if y_lims is not False:
+                ax3.set_xlim(y_lims[0], y_lims[1])
+            ax3.legend(loc=0)
+        else:
+            ax3.remove()
         #fig.tight_layout()
-        fig.savefig(str(plot_name) + '.png', bbox_inches='tight')
+        fig.savefig(plot_name.strip('.txt') + '.png', format = 'png', bbox_inches='tight')
+        fig.savefig(plot_name.strip('.txt') + '.pdf', format = 'pdf', bbox_inches='tight')
+
+    if horizontal_linecuts is not None and vertical_linecuts is None:
+        fig, (ax1, ax2) = plt.subplots(figsize=(6, 9), nrows=2, ncols=1, squeeze=True)
+
+        if x_lims is not False:
+            ax1.set_xlim(x_lims[0], x_lims[1])
+        if y_lims is not False:
+            ax1.set_ylim(y_lims[0], y_lims[1])
+        im = ax1.imshow(z, cmap=plt.cm.RdBu, norm=LogNorm(vmin=z.min(), vmax=z.max()), interpolation='none',
+                        origin='lower',
+                        extent=[flatx[0], flatx[-1], flaty[0], flaty[-1]], aspect="auto", vmin=color_min,
+                        vmax=color_max)
+        cbar = fig.colorbar(im, ax=ax1, orientation='vertical', aspect=10, shrink=0.8)
+
+        cbar.ax.tick_params(labelsize=axes_font, which='both', direction='in', width=1)
+        cbar.set_label(label_z, size=axes_font, labelpad=-2)
+        cbar.ax.spines['right'].set_linewidth(1)
+        cbar.ax.spines['left'].set_linewidth(1)
+        cbar.ax.spines['top'].set_linewidth(1)
+        cbar.ax.spines['bottom'].set_linewidth(1)
+        cbar.set_label(label_z, size=axes_font)
+        ax1.set_xlabel(label_x, fontsize=axes_font)
+        ax1.set_ylabel(label_y, fontsize=axes_font)
+        ax1.set_title(inputFile)
+        if points_list is not None:
+            for point in points_list:
+                ax1.plot(conversion_x * point[0], conversion_y * point[1], '*', color='yellow', markersize=10)
+                print('First point at:', point[0], ',', point[1])
+        # horizontal linecuts
+        if horizontal_linecuts is not None:
+            ax2.set_xlabel(label_x, fontsize=axes_font)
+            ax2.set_ylabel(label_z, size=axes_font)
+            cbar2 = plt.colorbar(im, ax=ax2, orientation='vertical')
+            cbar2.remove()
+            for y_cut in horizontal_linecuts:
+                y_cut_real = find_nearest(flaty, y_cut)
+                data_hcut = data[data[:, col_y] == y_cut_real]
+                z_cut = conversion_z * np.array(data_hcut[:, col_z])
+                x_cut = conversion_x * np.array(data_hcut[:, col_x])
+                ax2.plot(x_cut, z_cut, label=str(np.round(y_cut_real, 2)))
+            if x_lims is not False:
+                ax2.set_xlim(x_lims[0], x_lims[1])
+            ax2.legend(loc=0)
+        else:
+            ax2.remove()
+        # fig.tight_layout()
+        fig.savefig(plot_name.strip('.txt') + '.png', format='png', bbox_inches='tight')
+        fig.savefig(plot_name.strip('.txt') + '.pdf', format='pdf', bbox_inches='tight')
+
+    if horizontal_linecuts is None and vertical_linecuts is not None:
+        fig, (ax1, ax3) = plt.subplots(figsize=(6, 9), nrows=2, ncols=1, squeeze=True)
+
+        if x_lims is not False:
+            ax1.set_xlim(x_lims[0], x_lims[1])
+        if y_lims is not False:
+            ax1.set_ylim(y_lims[0], y_lims[1])
+        im = ax1.imshow(z, cmap=plt.cm.RdBu, norm=LogNorm(vmin=z.min(), vmax=z.max()), interpolation='none',
+                        origin='lower',
+                        extent=[flatx[0], flatx[-1], flaty[0], flaty[-1]], aspect="auto", vmin=color_min,
+                        vmax=color_max)
+        cbar = fig.colorbar(im, ax=ax1, orientation='vertical', aspect=10, shrink=0.8)
+
+        cbar.ax.tick_params(labelsize=axes_font, which='both', direction='in', width=1)
+        cbar.set_label(label_z, size=axes_font, labelpad=-2)
+        cbar.ax.spines['right'].set_linewidth(1)
+        cbar.ax.spines['left'].set_linewidth(1)
+        cbar.ax.spines['top'].set_linewidth(1)
+        cbar.ax.spines['bottom'].set_linewidth(1)
+        cbar.set_label(label_z, size=axes_font)
+        ax1.set_xlabel(label_x, fontsize=axes_font)
+        ax1.set_ylabel(label_y, fontsize=axes_font)
+        ax1.set_title(inputFile)
+        if points_list is not None:
+            for point in points_list:
+                ax1.plot(conversion_x * point[0], conversion_y * point[1], '*', color='yellow', markersize=10)
+                print('First point at:', point[0], ',', point[1])
+        # vertical linecuts
+        if vertical_linecuts is not None:
+            ax3.set_xlabel(label_y, fontsize=axes_font)
+            ax3.set_ylabel(label_z, size=axes_font)
+            cbar3 = plt.colorbar(im, ax=ax3, orientation='vertical')
+            cbar3.remove()
+            for x_cut in vertical_linecuts:
+                x_cut_real = find_nearest(flatx, x_cut)
+                data_vcut = data[data[:, col_x] == x_cut_real]
+                z_cut = conversion_z * np.array(data_vcut[:, col_z])
+                y_cut = conversion_x * np.array(data_vcut[:, col_y])
+                ax3.plot(y_cut, z_cut, label=str(np.round(x_cut_real)))
+            if y_lims is not False:
+                ax3.set_xlim(y_lims[0], y_lims[1])
+            ax3.legend(loc=0)
+        else:
+            ax3.remove()
+        # fig.tight_layout()
+        fig.savefig(plot_name.strip('.txt') + '.png', format='png', bbox_inches='tight')
+        fig.savefig(plot_name.strip('.txt') + '.pdf', format='pdf', bbox_inches='tight')
+
+    if horizontal_linecuts is None and vertical_linecuts is  None:
+        fig, ax1 = plt.subplots(figsize=(6, 5), nrows=1, ncols=1, squeeze=True)
+
+        if x_lims is not False:
+            ax1.set_xlim(x_lims[0], x_lims[1])
+        if y_lims is not False:
+            ax1.set_ylim(y_lims[0], y_lims[1])
+        im = ax1.imshow(z, cmap=plt.cm.RdBu, norm=LogNorm(vmin=z.min(), vmax=z.max()), interpolation='none',
+                        origin='lower',
+                        extent=[flatx[0], flatx[-1], flaty[0], flaty[-1]], aspect="auto", vmin=color_min,
+                        vmax=color_max)
+        cbar = fig.colorbar(im, ax=ax1, orientation='vertical', aspect=10, shrink=0.8)
+
+        cbar.ax.tick_params(labelsize=axes_font, which='both', direction='in', width=1)
+        cbar.set_label(label_z, size=axes_font, labelpad=-2)
+        cbar.ax.spines['right'].set_linewidth(1)
+        cbar.ax.spines['left'].set_linewidth(1)
+        cbar.ax.spines['top'].set_linewidth(1)
+        cbar.ax.spines['bottom'].set_linewidth(1)
+        cbar.set_label(label_z, size=axes_font)
+        ax1.set_xlabel(label_x, fontsize=axes_font)
+        ax1.set_ylabel(label_y, fontsize=axes_font)
+        ax1.set_title(inputFile)
+        if points_list is not None:
+            for point in points_list:
+                ax1.plot(conversion_x * point[0], conversion_y * point[1], '*', color='yellow', markersize=10)
+                print('First point at:', point[0], ',', point[1])
+                # fig.tight_layout()
+        fig.savefig(plot_name.strip('.txt') + '.png', format='png', bbox_inches='tight')
+        fig.savefig(plot_name.strip('.txt') + '.pdf', format='pdf', bbox_inches='tight')
+
 
     return flatx, flaty, z
 
