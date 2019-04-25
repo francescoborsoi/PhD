@@ -1762,8 +1762,8 @@ def colorplot_special(inputFile,
             ax1.set_xlim(x_lims[0], x_lims[1])
         if y_lims is not False:
             ax1.set_ylim(y_lims[0], y_lims[1])
-        im = ax1.imshow(z, cmap=plt.cm.RdBu, norm=LogNorm(vmin=z.min(), vmax=z.max()),  interpolation='none', origin='lower',
-                        extent=[flatx[0], flatx[-1], flaty[0], flaty[-1]], aspect="auto", vmin = color_min, vmax = color_max)
+        im = ax1.imshow(z, cmap=plt.cm.RdBu,  interpolation='none', origin='lower',
+                        extent=[flatx[0], flatx[-1], flaty[0], flaty[-1]], aspect="auto")
         cbar = fig.colorbar(im, ax=ax1, orientation='vertical', aspect = 10, shrink = 0.8 )
 
         cbar.ax.tick_params(labelsize=axes_font, which='both', direction='in', width=1)
